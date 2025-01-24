@@ -30,6 +30,7 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.NetMask;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.buf.StringUtils;
 
 public final class RemoteCIDRValve extends RequestFilterValve {
 
@@ -56,8 +57,7 @@ public final class RemoteCIDRValve extends RequestFilterValve {
     /**
      * Return a string representation of the {@link NetMask} list in #allow.
      *
-     * @return the #allow list as a string, without the leading '[' and trailing
-     *         ']'
+     * @return the #allow list as a string, without the leading '[' and trailing ']'
      */
     @Override
     public String getAllow() {
@@ -66,10 +66,10 @@ public final class RemoteCIDRValve extends RequestFilterValve {
 
 
     /**
-     * Fill the #allow list with the list of netmasks provided as an argument,
-     * if any. Calls #fillFromInput.
+     * Fill the #allow list with the list of netmasks provided as an argument, if any. Calls #fillFromInput.
      *
      * @param input The list of netmasks, as a comma separated string
+     *
      * @throws IllegalArgumentException One or more netmasks are invalid
      */
     @Override
@@ -92,8 +92,7 @@ public final class RemoteCIDRValve extends RequestFilterValve {
     /**
      * Return a string representation of the {@link NetMask} list in #deny.
      *
-     * @return the #deny list as a string, without the leading '[' and trailing
-     *         ']'
+     * @return the #deny list as a string, without the leading '[' and trailing ']'
      */
     @Override
     public String getDeny() {
@@ -102,10 +101,10 @@ public final class RemoteCIDRValve extends RequestFilterValve {
 
 
     /**
-     * Fill the #deny list with the list of netmasks provided as an argument, if
-     * any. Calls #fillFromInput.
+     * Fill the #deny list with the list of netmasks provided as an argument, if any. Calls #fillFromInput.
      *
      * @param input The list of netmasks, as a comma separated string
+     *
      * @throws IllegalArgumentException One or more netmasks are invalid
      */
     @Override
@@ -134,8 +133,7 @@ public final class RemoteCIDRValve extends RequestFilterValve {
             property = request.getRequest().getRemoteAddr();
         }
         if (getAddConnectorPort()) {
-            property = property + ";" +
-                request.getConnector().getPortWithOffset();
+            property = property + ";" + request.getConnector().getPortWithOffset();
         }
         process(property, request, response);
     }
@@ -221,11 +219,12 @@ public final class RemoteCIDRValve extends RequestFilterValve {
 
 
     /**
-     * Fill a {@link NetMask} list from a string input containing a
-     * comma-separated list of (hopefully valid) {@link NetMask}s.
+     * Fill a {@link NetMask} list from a string input containing a comma-separated list of (hopefully valid)
+     * {@link NetMask}s.
      *
-     * @param input The input string
+     * @param input  The input string
      * @param target The list to fill
+     *
      * @return a string list of processing errors (empty when no errors)
      */
 
@@ -238,7 +237,7 @@ public final class RemoteCIDRValve extends RequestFilterValve {
         final List<String> messages = new ArrayList<>();
         NetMask nm;
 
-        for (final String s : input.split("\\s*,\\s*")) {
+        for (final String s : StringUtils.splitCommaSeparated(input)) {
             try {
                 nm = new NetMask(s);
                 target.add(nm);

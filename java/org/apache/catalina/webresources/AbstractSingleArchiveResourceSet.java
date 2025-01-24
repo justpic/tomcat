@@ -30,8 +30,7 @@ import org.apache.catalina.WebResourceRoot;
 import org.apache.tomcat.util.buf.UriUtil;
 
 /**
- * Base class for a {@link org.apache.catalina.WebResourceSet} based on a
- * single, rather than nested, archive.
+ * Base class for a {@link org.apache.catalina.WebResourceSet} based on a single, rather than nested, archive.
  */
 public abstract class AbstractSingleArchiveResourceSet extends AbstractArchiveResourceSet {
 
@@ -44,8 +43,8 @@ public abstract class AbstractSingleArchiveResourceSet extends AbstractArchiveRe
     }
 
 
-    public AbstractSingleArchiveResourceSet(WebResourceRoot root, String webAppMount, String base,
-            String internalPath) throws IllegalArgumentException {
+    public AbstractSingleArchiveResourceSet(WebResourceRoot root, String webAppMount, String base, String internalPath)
+            throws IllegalArgumentException {
         setRoot(root);
         setWebAppMount(webAppMount);
         setBase(base);
@@ -131,7 +130,7 @@ public abstract class AbstractSingleArchiveResourceSet extends AbstractArchiveRe
     }
 
 
-    //-------------------------------------------------------- Lifecycle methods
+    // -------------------------------------------------------- Lifecycle methods
     @Override
     protected void initInternal() throws LifecycleException {
 

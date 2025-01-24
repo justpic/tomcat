@@ -67,6 +67,8 @@ public class PageContextImpl extends PageContext {
 
     private static final JspFactory jspf = JspFactory.getDefaultFactory();
 
+    private static final BodyContentImpl[] EMPTY_BODY_CONTENT_IMPL_ARRAY = new BodyContentImpl[0];
+
     private BodyContentImpl[] outs;
 
     private int depth;
@@ -104,11 +106,8 @@ public class PageContextImpl extends PageContext {
 
     private transient JspWriterImpl baseOut;
 
-    /*
-     * Constructor.
-     */
     PageContextImpl() {
-        this.outs = new BodyContentImpl[0];
+        this.outs = EMPTY_BODY_CONTENT_IMPL_ARRAY;
         this.attributes = new HashMap<>(16);
         this.depth = -1;
     }
@@ -268,7 +267,7 @@ public class PageContextImpl extends PageContext {
                 break;
 
             default:
-                throw new IllegalArgumentException("Invalid scope");
+                throw new IllegalArgumentException(Localizer.getMessage("jsp.error.page.invalid.scope"));
             }
         }
     }
@@ -467,7 +466,7 @@ public class PageContextImpl extends PageContext {
         return servlet;
     }
 
-    private final String getAbsolutePathRelativeToContext(String relativeUrlPath) {
+    private String getAbsolutePathRelativeToContext(String relativeUrlPath) {
         String path = relativeUrlPath;
 
         if (!path.startsWith("/")) {
@@ -592,9 +591,10 @@ public class PageContextImpl extends PageContext {
              * not been committed (the response will have been committed if the
              * error page is a JSP page).
              */
-            request.setAttribute(PageContext.EXCEPTION, t);
+            request.setAttribute(EXCEPTION, t);
             request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE,
                     Integer.valueOf(HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
+            request.setAttribute(RequestDispatcher.ERROR_METHOD, ((HttpServletRequest) request).getMethod());
             request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, ((HttpServletRequest) request).getRequestURI());
             request.setAttribute(RequestDispatcher.ERROR_QUERY_STRING, ((HttpServletRequest) request).getQueryString());
             request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, config.getServletName());
@@ -617,7 +617,7 @@ public class PageContextImpl extends PageContext {
             request.removeAttribute(RequestDispatcher.ERROR_STATUS_CODE);
             request.removeAttribute(RequestDispatcher.ERROR_REQUEST_URI);
             request.removeAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
-            request.removeAttribute(PageContext.EXCEPTION);
+            request.removeAttribute(EXCEPTION);
 
         } else {
             // Otherwise throw the exception wrapped inside a ServletException.
@@ -696,7 +696,16 @@ public class PageContextImpl extends PageContext {
                 Set<String> classImports = ((JspSourceImports) servlet).getClassImports();
                 if (classImports != null) {
                     for (String classImport : classImports) {
-                        ih.importClass(classImport);
+                        if (classImport.startsWith("static ")) {
+                            classImport = classImport.substring(7);
+                            try {
+                                ih.importStatic(classImport);
+                            } catch (ELException e) {
+                                // Ignore - not all static imports are valid for EL
+                            }
+                        } else {
+                            ih.importClass(classImport);
+                        }
                     }
                 }
             }

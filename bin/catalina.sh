@@ -251,9 +251,6 @@ if [ -z "$JSSE_OPTS" ] ; then
 fi
 JAVA_OPTS="$JAVA_OPTS $JSSE_OPTS"
 
-# Register custom URL handlers
-JAVA_OPTS="$JAVA_OPTS -Djava.protocol.handler.pkgs=org.apache.catalina.webresources"
-
 # Set juli LogManager config file if it is present and an override has not been issued
 if [ -z "$CATALINA_LOGGING_CONFIG" ]; then
   if [ -r "$CATALINA_BASE"/conf/logging.properties ]; then
@@ -295,6 +292,7 @@ JAVA_OPTS="$JAVA_OPTS --add-opens=java.base/java.io=ALL-UNNAMED"
 JAVA_OPTS="$JAVA_OPTS --add-opens=java.base/java.util=ALL-UNNAMED"
 JAVA_OPTS="$JAVA_OPTS --add-opens=java.base/java.util.concurrent=ALL-UNNAMED"
 JAVA_OPTS="$JAVA_OPTS --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+JAVA_OPTS="$JAVA_OPTS --enable-native-access=ALL-UNNAMED"
 
 # ----- Execute The Requested Command -----------------------------------------
 
@@ -565,9 +563,9 @@ elif [ "$1" = "configtest" ] ; then
 
 elif [ "$1" = "version" ] ; then
 
-    "$_RUNJAVA"   \
-      -classpath "$CATALINA_HOME/lib/catalina.jar" \
-      org.apache.catalina.util.ServerInfo
+   eval "\"$_RUNJAVA\"" "$JAVA_OPTS" \
+         -classpath "\"$CATALINA_HOME/lib/catalina.jar\"" \
+         org.apache.catalina.util.ServerInfo
 
 else
 
