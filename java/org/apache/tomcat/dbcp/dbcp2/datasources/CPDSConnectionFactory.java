@@ -84,7 +84,7 @@ final class CPDSConnectionFactory
      *            The password to use to create connections
      * @since 2.10.0
      */
-    public CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
+    CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
             final Duration validationQueryTimeoutDuration, final boolean rollbackAfterValidation, final String userName,
         final char[] userPassword) {
         this.cpds = cpds;
@@ -113,7 +113,7 @@ final class CPDSConnectionFactory
      *            The password to use to create connections
      * @since 2.10.0
      */
-    public CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery, final Duration validationQueryTimeoutDuration,
+    CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery, final Duration validationQueryTimeoutDuration,
         final boolean rollbackAfterValidation, final String userName, final String userPassword) {
         this(cpds, validationQuery, validationQueryTimeoutDuration, rollbackAfterValidation, userName, Utils.toCharArray(userPassword));
     }
@@ -139,7 +139,7 @@ final class CPDSConnectionFactory
      * @deprecated Use {@link #CPDSConnectionFactory(ConnectionPoolDataSource, String, Duration, boolean, String, char[])}.
      */
     @Deprecated
-    public CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
+    CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
             final int validationQueryTimeoutSeconds, final boolean rollbackAfterValidation, final String userName,
         final char[] userPassword) {
         this.cpds = cpds;
@@ -169,7 +169,7 @@ final class CPDSConnectionFactory
      * @deprecated Use {@link #CPDSConnectionFactory(ConnectionPoolDataSource, String, Duration, boolean, String, String)}.
      */
     @Deprecated
-    public CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery, final int validationQueryTimeoutSeconds,
+    CPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery, final int validationQueryTimeoutSeconds,
             final boolean rollbackAfterValidation, final String userName, final String userPassword) {
         this(cpds, validationQuery, validationQueryTimeoutSeconds, rollbackAfterValidation, userName, Utils.toCharArray(userPassword));
     }
@@ -304,26 +304,22 @@ final class CPDSConnectionFactory
     }
 
     @Override
-    public synchronized PooledObject<PooledConnectionAndInfo> makeObject() {
-        try {
-            PooledConnection pc = null;
-            if (userPassKey.getUserName() == null) {
-                pc = cpds.getPooledConnection();
-            } else {
-                pc = cpds.getPooledConnection(userPassKey.getUserName(), userPassKey.getPassword());
-            }
-            if (pc == null) {
-                throw new IllegalStateException("Connection pool data source returned null from getPooledConnection");
-            }
-            // should we add this object as a listener or the pool.
-            // consider the validateObject method in decision
-            pc.addConnectionEventListener(this);
-            final PooledConnectionAndInfo pci = new PooledConnectionAndInfo(pc, userPassKey);
-            pcMap.put(pc, pci);
-            return new DefaultPooledObject<>(pci);
-        } catch (final SQLException e) {
-            throw new RuntimeException(e.getMessage());
+    public synchronized PooledObject<PooledConnectionAndInfo> makeObject() throws SQLException {
+        PooledConnection pc = null;
+        if (userPassKey.getUserName() == null) {
+            pc = cpds.getPooledConnection();
+        } else {
+            pc = cpds.getPooledConnection(userPassKey.getUserName(), userPassKey.getPassword());
         }
+        if (pc == null) {
+            throw new IllegalStateException("Connection pool data source returned null from getPooledConnection");
+        }
+        // should we add this object as a listener or the pool.
+        // consider the validateObject method in decision
+        pc.addConnectionEventListener(this);
+        final PooledConnectionAndInfo pci = new PooledConnectionAndInfo(pc, userPassKey);
+        pcMap.put(pc, pci);
+        return new DefaultPooledObject<>(pci);
     }
 
     @Override

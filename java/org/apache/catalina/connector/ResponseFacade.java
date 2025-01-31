@@ -31,8 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tomcat.util.res.StringManager;
 
 /**
- * Facade class that wraps a Coyote response object.
- * All methods are delegated to the wrapped response.
+ * Facade class that wraps a Coyote response object. All methods are delegated to the wrapped response.
  *
  * @author Remy Maucherat
  */
@@ -46,7 +45,7 @@ public class ResponseFacade implements HttpServletResponse {
      * @param response The response to be wrapped
      */
     public ResponseFacade(Response response) {
-         this.response = response;
+        this.response = response;
     }
 
 
@@ -112,29 +111,24 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        checkFacade();
-        ServletOutputStream sos = response.getOutputStream();
         if (isFinished()) {
             response.setSuspended(true);
         }
-        return sos;
+        return response.getOutputStream();
     }
 
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        checkFacade();
-        PrintWriter writer = response.getWriter();
         if (isFinished()) {
             response.setSuspended(true);
         }
-        return writer;
+        return response.getWriter();
     }
 
 
     @Override
     public void setContentLength(int len) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -144,7 +138,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setContentLengthLong(long length) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -154,7 +147,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setContentType(String type) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -178,7 +170,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void flushBuffer() throws IOException {
-        checkFacade();
         if (isFinished()) {
             return;
         }
@@ -210,7 +201,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setLocale(Locale loc) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -227,7 +217,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void addCookie(Cookie cookie) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -257,32 +246,64 @@ public class ResponseFacade implements HttpServletResponse {
 
 
     @Override
+    public void sendEarlyHints() {
+        response.sendEarlyHints();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <i>Deprecated functionality</i>: calling <code>sendError</code> with a status code of 103 differs from the usual
+     * behavior. Sending 103 will trigger the container to send a "103 Early Hints" informational response including all
+     * current headers. The application can continue to use the request and response after calling sendError with a 103
+     * status code, including triggering a more typical response of any type.
+     * <p>
+     * Starting with Tomcat 12, applications should use {@link #sendEarlyHints}.
+     */
+    @Override
     public void sendError(int sc, String msg) throws IOException {
         checkCommitted("coyoteResponse.sendError.ise");
-        response.setAppCommitted(true);
-        response.sendError(sc, msg);
+        if (HttpServletResponse.SC_EARLY_HINTS == sc) {
+            sendEarlyHints();
+        } else {
+            response.setAppCommitted(true);
+            response.sendError(sc, msg);
+        }
     }
 
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <i>Deprecated functionality</i>: calling <code>sendError</code> with a status code of 103 differs from the usual
+     * behavior. Sending 103 will trigger the container to send a "103 Early Hints" informational response including all
+     * current headers. The application can continue to use the request and response after calling sendError with a 103
+     * status code, including triggering a more typical response of any type.
+     * <p>
+     * Starting with Tomcat 12, applications should use {@link #sendEarlyHints}.
+     */
     @Override
     public void sendError(int sc) throws IOException {
         checkCommitted("coyoteResponse.sendError.ise");
-        response.setAppCommitted(true);
-        response.sendError(sc);
+        if (HttpServletResponse.SC_EARLY_HINTS == sc) {
+            sendEarlyHints();
+        } else {
+            response.setAppCommitted(true);
+            response.sendError(sc);
+        }
     }
 
 
     @Override
-    public void sendRedirect(String location) throws IOException {
+    public void sendRedirect(String location, int sc, boolean clearBuffer) throws IOException {
         checkCommitted("coyoteResponse.sendRedirect.ise");
         response.setAppCommitted(true);
-        response.sendRedirect(location);
+        response.sendRedirect(location, sc, clearBuffer);
     }
 
 
     @Override
     public void setDateHeader(String name, long date) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -292,7 +313,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void addDateHeader(String name, long date) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -302,7 +322,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setHeader(String name, String value) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -312,7 +331,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void addHeader(String name, String value) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -322,7 +340,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setIntHeader(String name, int value) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -332,7 +349,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void addIntHeader(String name, int value) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -342,7 +358,6 @@ public class ResponseFacade implements HttpServletResponse {
 
     @Override
     public void setStatus(int sc) {
-        checkFacade();
         if (isCommitted()) {
             return;
         }
@@ -395,14 +410,14 @@ public class ResponseFacade implements HttpServletResponse {
 
 
     @Override
-    public void setTrailerFields(Supplier<Map<String, String>> supplier) {
+    public void setTrailerFields(Supplier<Map<String,String>> supplier) {
         checkFacade();
         response.setTrailerFields(supplier);
     }
 
 
     @Override
-    public Supplier<Map<String, String>> getTrailerFields() {
+    public Supplier<Map<String,String>> getTrailerFields() {
         checkFacade();
         return response.getTrailerFields();
     }
@@ -416,7 +431,6 @@ public class ResponseFacade implements HttpServletResponse {
 
 
     private void checkCommitted(String messageKey) {
-        checkFacade();
         if (isCommitted()) {
             throw new IllegalStateException(sm.getString(messageKey));
         }

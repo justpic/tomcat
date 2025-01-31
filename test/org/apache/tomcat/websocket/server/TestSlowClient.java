@@ -19,6 +19,8 @@ package org.apache.tomcat.websocket.server;
 import java.net.URI;
 
 import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
@@ -34,13 +36,14 @@ import org.apache.coyote.AbstractProtocol;
 import org.apache.tomcat.websocket.TesterFirehoseServer;
 import org.apache.tomcat.websocket.TesterMessageCountClient.TesterProgrammaticEndpoint;
 import org.apache.tomcat.websocket.WebSocketBaseTest;
+import org.apache.tomcat.websocket.WsSession;
 
 public class TestSlowClient extends WebSocketBaseTest {
 
     @Test
     public void testSendingFromAppThread() throws Exception {
         Tomcat tomcat = getTomcatInstance();
-        Context ctx = tomcat.addContext("", null);
+        Context ctx = getProgrammaticRootContext();
         // Server side endpoint that sends a stream of messages on a new thread
         // in response to any message received.
         ctx.addApplicationListener(TesterFirehoseServer.ConfigThread.class.getName());
@@ -52,7 +55,8 @@ public class TestSlowClient extends WebSocketBaseTest {
         // WebSocket client
         WebSocketContainer wsContainer = ContainerProvider.getWebSocketContainer();
         Session wsSession = wsContainer.connectToServer(TesterProgrammaticEndpoint.class,
-                ClientEndpointConfig.Builder.create().build(), new URI("ws://localhost:" + getPort() + TesterFirehoseServer.PATH));
+                ClientEndpointConfig.Builder.create().build(),
+                new URI("ws://localhost:" + getPort() + TesterFirehoseServer.PATH));
         // Configure a handler designed to create a backlog causing the server
         // side write to time out.
         wsSession.addMessageHandler(new VerySlowHandler());
@@ -69,11 +73,19 @@ public class TestSlowClient extends WebSocketBaseTest {
             count++;
         }
         Assert.assertTrue(wsSession.isOpen());
-        wsSession.close();
+
+        // Cast so we can force the session to be closed quickly.
+        CloseReason cr = new CloseReason(CloseCodes.CLOSED_ABNORMALLY, "");
+        ((WsSession) wsSession).doClose(cr, cr, true);
 
         // BZ 64848 (non-container thread variant)
         // Confirm there are no waiting processors
         AbstractProtocol<?> protocol = (AbstractProtocol<?>) tomcat.getConnector().getProtocolHandler();
+        count = 0;
+        while (protocol.getWaitingProcessorCount() > 0 && count < 200) {
+            Thread.sleep(100);
+            count++;
+        }
         Assert.assertEquals(0, protocol.getWaitingProcessorCount());
     }
 

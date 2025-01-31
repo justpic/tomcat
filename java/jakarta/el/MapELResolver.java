@@ -23,8 +23,7 @@ import java.util.Objects;
 
 public class MapELResolver extends ELResolver {
 
-    private static final Class<?> UNMODIFIABLE =
-            Collections.unmodifiableMap(new HashMap<>()).getClass();
+    private static final Class<?> UNMODIFIABLE = Collections.unmodifiableMap(new HashMap<>()).getClass();
 
     private final boolean readOnly;
 
@@ -43,7 +42,7 @@ public class MapELResolver extends ELResolver {
         if (base instanceof Map<?,?>) {
             context.setPropertyResolved(base, property);
 
-            Map<?, ?> map = (Map<?, ?>) base;
+            Map<?,?> map = (Map<?,?>) base;
             if (readOnly || map.getClass() == UNMODIFIABLE) {
                 return null;
             }
@@ -67,21 +66,20 @@ public class MapELResolver extends ELResolver {
     }
 
     @Override
-    public void setValue(ELContext context, Object base, Object property,
-            Object value) {
+    public void setValue(ELContext context, Object base, Object property, Object value) {
         Objects.requireNonNull(context);
 
-        if (base instanceof Map<?, ?>) {
+        if (base instanceof Map<?,?>) {
             context.setPropertyResolved(base, property);
 
             if (this.readOnly) {
-                throw new PropertyNotWritableException(Util.message(context,
-                        "resolverNotWritable", base.getClass().getName()));
+                throw new PropertyNotWritableException(
+                        Util.message(context, "resolverNotWritable", base.getClass().getName()));
             }
 
             try {
                 @SuppressWarnings("unchecked") // Must be OK
-                Map<Object, Object> map = ((Map<Object, Object>) base);
+                Map<Object,Object> map = ((Map<Object,Object>) base);
                 map.put(property, value);
             } catch (UnsupportedOperationException e) {
                 throw new PropertyNotWritableException(e);
@@ -93,7 +91,7 @@ public class MapELResolver extends ELResolver {
     public boolean isReadOnly(ELContext context, Object base, Object property) {
         Objects.requireNonNull(context);
 
-        if (base instanceof Map<?, ?>) {
+        if (base instanceof Map<?,?>) {
             context.setPropertyResolved(base, property);
             return this.readOnly || UNMODIFIABLE.equals(base.getClass());
         }
@@ -103,7 +101,7 @@ public class MapELResolver extends ELResolver {
 
     @Override
     public Class<?> getCommonPropertyType(ELContext context, Object base) {
-        if (base instanceof Map<?, ?>) {
+        if (base instanceof Map<?,?>) {
             return Object.class;
         }
         return null;

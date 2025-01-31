@@ -78,7 +78,7 @@ class JspReader {
      * @throws FileNotFoundException If the JSP file is not found (or is unreadable)
      * @throws IOException If an IO-level error occurs, e.g. reading the file
      */
-    public JspReader(JspCompilationContext ctxt,
+    JspReader(JspCompilationContext ctxt,
                      String fname,
                      String encoding,
                      Jar jar,
@@ -100,7 +100,7 @@ class JspReader {
      *
      * @throws JasperException If an error occurs parsing the JSP file
      */
-    public JspReader(JspCompilationContext ctxt,
+    JspReader(JspCompilationContext ctxt,
                      String fname,
                      InputStreamReader reader,
                      ErrorDispatcher err)
@@ -127,7 +127,7 @@ class JspReader {
                     reader.close();
                 } catch (Exception any) {
                     if(log.isDebugEnabled()) {
-                        log.debug("Exception closing reader: ", any);
+                        log.debug(Localizer.getMessage("jsp.error.file.close"), any);
                     }
                 }
             }

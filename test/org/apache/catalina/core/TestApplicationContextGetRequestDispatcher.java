@@ -86,13 +86,6 @@ public class TestApplicationContextGetRequestDispatcher extends TomcatBaseTest {
 
 
     @Test
-    public void testGetRequestDispatcherEncodedTraversal() throws Exception {
-        doTestGetRequestDispatcher(
-                true, "/prefix/start", null, "%2E%2E/target", "/target", DispatcherServlet.NULL);
-    }
-
-
-    @Test
     public void testGetRequestDispatcherTraversal01() throws Exception {
         doTestGetRequestDispatcher(
                 true, "/prefix/start", null, "../target", "/target", TargetServlet.OK);
@@ -131,6 +124,13 @@ public class TestApplicationContextGetRequestDispatcher extends TomcatBaseTest {
     public void testGetRequestDispatcherTraversal06() throws Exception {
         doTestGetRequestDispatcher(
                 false, "/prefix/start", "a=b", "../target", "/target", TargetServlet.OK + "a=b");
+    }
+
+
+    @Test
+    public void testGetRequestDispatcherTraversal07() throws Exception {
+        doTestGetRequestDispatcher(
+                true, "/prefix/start", null, "../../target", "/target", DispatcherServlet.NULL);
     }
 
 
@@ -437,7 +437,7 @@ public class TestApplicationContextGetRequestDispatcher extends TomcatBaseTest {
 
         private final String dispatchPath;
 
-        public DispatcherServlet(String dispatchPath) {
+        DispatcherServlet(String dispatchPath) {
             this.dispatchPath = dispatchPath;
         }
 
@@ -489,7 +489,7 @@ public class TestApplicationContextGetRequestDispatcher extends TomcatBaseTest {
         private final String dispatchPath;
         private final boolean encodePath;
 
-        public AsyncDispatcherServlet(String dispatchPath, boolean encodePath) {
+        AsyncDispatcherServlet(String dispatchPath, boolean encodePath) {
             this.dispatchPath = dispatchPath;
             this.encodePath = encodePath;
         }
