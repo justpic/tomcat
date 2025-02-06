@@ -638,7 +638,7 @@ public class JspUtil {
                     "jsp.error.file.not.found", fname));
         }
 
-        return new BufferedInputStream(in, JspUtil.JSP_INPUT_STREAM_BUFFER_SIZE);
+        return new BufferedInputStream(in, JSP_INPUT_STREAM_BUFFER_SIZE);
     }
 
     public static InputSource getInputSource(String fname, Jar jar, JspCompilationContext ctxt)
@@ -775,7 +775,7 @@ public class JspUtil {
      *
      * @return Legal Java identifier corresponding to the given identifier
      */
-    private static final String makeJavaIdentifier(String identifier,
+    private static String makeJavaIdentifier(String identifier,
             boolean periodToUnderscore) {
         StringBuilder modifiedIdentifier = new StringBuilder(identifier.length());
         if (!Character.isJavaIdentifierStart(identifier.charAt(0))) {

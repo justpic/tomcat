@@ -16,7 +16,6 @@
  */
 package org.apache.coyote.http11;
 
-import org.apache.coyote.Processor;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.net.Nio2Channel;
@@ -32,24 +31,25 @@ public class Http11Nio2Protocol extends AbstractHttp11Protocol<Nio2Channel> {
 
 
     public Http11Nio2Protocol() {
-        super(new Nio2Endpoint());
+        this(new Nio2Endpoint());
+    }
+
+
+    public Http11Nio2Protocol(Nio2Endpoint endpoint) {
+        super(endpoint);
     }
 
 
     @Override
-    protected Log getLog() { return log; }
-
-
-    @Override
-    protected Processor createProcessor() {
-        return new Http11Processor(this, adapter);
+    protected Log getLog() {
+        return log;
     }
 
 
     @Override
     protected String getNamePrefix() {
         if (isSSLEnabled()) {
-            return "https-" + getSslImplementationShortName()+ "-nio2";
+            return "https-" + getSslImplementationShortName() + "-nio2";
         } else {
             return "http-nio2";
         }

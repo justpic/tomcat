@@ -42,7 +42,7 @@ public class TestHttp11OutputBuffer extends TomcatBaseTest {
         Tomcat tomcat = getTomcatInstance();
 
         // No file system docBase required
-        Context ctx = tomcat.addContext("", null);
+        Context ctx = getProgrammaticRootContext();
 
         Tomcat.addServlet(ctx, "echo", new EchoBodyServlet());
         ctx.addServletMappingDecoded("/echo", "echo");
@@ -90,14 +90,14 @@ public class TestHttp11OutputBuffer extends TomcatBaseTest {
         Tomcat tomcat = getTomcatInstance();
 
         // No file system docBase required
-        Context ctx = tomcat.addContext("", null);
+        Context ctx = getProgrammaticRootContext();
 
         Tomcat.addServlet(ctx, "header", new HeaderServlet(customHeaderValue));
         ctx.addServletMappingDecoded("/header", "header");
 
         tomcat.start();
 
-        Map<String,List<String>> resHeaders = new HashMap<>();
+        Map<String, List<String>> resHeaders = new HashMap<>();
         int rc = getUrl("http://localhost:" + getPort() + "/header", new ByteChunk(), resHeaders);
 
         if (valid) {
@@ -110,6 +110,7 @@ public class TestHttp11OutputBuffer extends TomcatBaseTest {
             Assert.assertEquals(HttpServletResponse.SC_OK, rc);
             List<String> values = resHeaders.get(HeaderServlet.CUSTOM_HEADER_NAME);
             Assert.assertNull(values);
+            Assert.assertEquals(5, resHeaders.size());
         }
     }
 
@@ -122,7 +123,7 @@ public class TestHttp11OutputBuffer extends TomcatBaseTest {
 
         private final String customHeaderValue;
 
-        public HeaderServlet(String customHeaderValue) {
+        HeaderServlet(String customHeaderValue) {
             this.customHeaderValue = customHeaderValue;
         }
 

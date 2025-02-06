@@ -87,13 +87,14 @@ public class ImportHandler {
         servletClassNames.add("UnavailableException");
         standardPackages.put("jakarta.servlet", servletClassNames);
 
-        // Servlet 6.0
+        // Servlet 6.1
         Set<String> servletHttpClassNames = new HashSet<>();
         // Interfaces
         servletHttpClassNames.add("HttpServletMapping");
         servletHttpClassNames.add("HttpServletRequest");
         servletHttpClassNames.add("HttpServletResponse");
         servletHttpClassNames.add("HttpSession");
+        servletHttpClassNames.add("HttpSession.Accessor");
         servletHttpClassNames.add("HttpSessionActivationListener");
         servletHttpClassNames.add("HttpSessionAttributeListener");
         servletHttpClassNames.add("HttpSessionBindingListener");
@@ -118,7 +119,7 @@ public class ImportHandler {
 
         // JSP 3.0
         Set<String> servletJspClassNames = new HashSet<>();
-        //Interfaces
+        // Interfaces
         servletJspClassNames.add("HttpJspPage");
         servletJspClassNames.add("JspApplicationContext");
         servletJspClassNames.add("JspPage");
@@ -136,7 +137,7 @@ public class ImportHandler {
         standardPackages.put("jakarta.servlet.jsp", servletJspClassNames);
 
         Set<String> javaLangClassNames = new HashSet<>();
-        // Based on Java 19 EA26
+        // Based on Java 21 EA29
         // Interfaces
         javaLangClassNames.add("Appendable");
         javaLangClassNames.add("AutoCloseable");
@@ -154,7 +155,7 @@ public class ImportHandler {
         javaLangClassNames.add("Thread.Builder.OfPlatform");
         javaLangClassNames.add("Thread.Builder.OfVirtual");
         javaLangClassNames.add("Thread.UncaughtExceptionHandler");
-        //Classes
+        // Classes
         javaLangClassNames.add("Boolean");
         javaLangClassNames.add("Byte");
         javaLangClassNames.add("Character");
@@ -185,6 +186,9 @@ public class ImportHandler {
         javaLangClassNames.add("Runtime");
         javaLangClassNames.add("Runtime.Version");
         javaLangClassNames.add("RuntimePermission");
+        javaLangClassNames.add("ScopedValue");
+        javaLangClassNames.add("ScopedValue.CallableOp");
+        javaLangClassNames.add("ScopedValue.Carrier");
         javaLangClassNames.add("SecurityManager");
         javaLangClassNames.add("Short");
         javaLangClassNames.add("StackTraceElement");
@@ -193,6 +197,9 @@ public class ImportHandler {
         javaLangClassNames.add("String");
         javaLangClassNames.add("StringBuffer");
         javaLangClassNames.add("StringBuilder");
+        javaLangClassNames.add("StringTemplate");
+        javaLangClassNames.add("StringTemplate.Processor");
+        javaLangClassNames.add("StringTemplate.Processor.Linkage");
         javaLangClassNames.add("System");
         javaLangClassNames.add("System.LoggerFinder");
         javaLangClassNames.add("Thread");
@@ -200,13 +207,13 @@ public class ImportHandler {
         javaLangClassNames.add("ThreadLocal");
         javaLangClassNames.add("Throwable");
         javaLangClassNames.add("Void");
-        //Enums
+        // Enums
         javaLangClassNames.add("Character.UnicodeScript");
         javaLangClassNames.add("ProcessBuilder.Redirect.Type");
         javaLangClassNames.add("StackWalker.Option");
         javaLangClassNames.add("System.Logger.Level");
         javaLangClassNames.add("Thread.State");
-        //Exceptions
+        // Exceptions
         javaLangClassNames.add("ArithmeticException");
         javaLangClassNames.add("ArrayIndexOutOfBoundsException");
         javaLangClassNames.add("ArrayStoreException");
@@ -238,7 +245,7 @@ public class ImportHandler {
         javaLangClassNames.add("TypeNotPresentException");
         javaLangClassNames.add("UnsupportedOperationException");
         javaLangClassNames.add("WrongThreadException");
-        //Errors
+        // Errors
         javaLangClassNames.add("AbstractMethodError");
         javaLangClassNames.add("AssertionError");
         javaLangClassNames.add("BootstrapMethodError");
@@ -262,7 +269,7 @@ public class ImportHandler {
         javaLangClassNames.add("UnsupportedClassVersionError");
         javaLangClassNames.add("VerifyError");
         javaLangClassNames.add("VirtualMachineError");
-        //Annotation Types
+        // Annotation Types
         javaLangClassNames.add("Deprecated");
         javaLangClassNames.add("FunctionalInterface");
         javaLangClassNames.add("Override");
@@ -283,12 +290,11 @@ public class ImportHandler {
     }
 
 
-    public void importStatic(String name) throws jakarta.el.ELException {
+    public void importStatic(String name) throws ELException {
         int lastPeriod = name.lastIndexOf('.');
 
         if (lastPeriod < 0) {
-            throw new ELException(Util.message(
-                    null, "importHandler.invalidStaticName", name));
+            throw new ELException(Util.message(null, "importHandler.invalidStaticName", name));
         }
 
         String className = name.substring(0, lastPeriod);
@@ -297,9 +303,7 @@ public class ImportHandler {
         Class<?> clazz = findClass(className, true);
 
         if (clazz == null) {
-            throw new ELException(Util.message(
-                    null, "importHandler.invalidClassNameForStatic",
-                    className, name));
+            throw new ELException(Util.message(null, "importHandler.invalidClassNameForStatic", className, name));
         }
 
         boolean found = false;
@@ -307,8 +311,7 @@ public class ImportHandler {
         for (Field field : clazz.getFields()) {
             if (field.getName().equals(fieldOrMethodName)) {
                 int modifiers = field.getModifiers();
-                if (Modifier.isStatic(modifiers) &&
-                        Modifier.isPublic(modifiers)) {
+                if (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)) {
                     found = true;
                     break;
                 }
@@ -319,8 +322,7 @@ public class ImportHandler {
             for (Method method : clazz.getMethods()) {
                 if (method.getName().equals(fieldOrMethodName)) {
                     int modifiers = method.getModifiers();
-                    if (Modifier.isStatic(modifiers) &&
-                            Modifier.isPublic(modifiers)) {
+                    if (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)) {
                         found = true;
                         break;
                     }
@@ -329,28 +331,25 @@ public class ImportHandler {
         }
 
         if (!found) {
-            throw new ELException(Util.message(null,
-                    "importHandler.staticNotFound", fieldOrMethodName,
-                    className, name));
+            throw new ELException(
+                    Util.message(null, "importHandler.staticNotFound", fieldOrMethodName, className, name));
         }
 
         Class<?> conflict = statics.get(fieldOrMethodName);
         if (conflict != null) {
-            throw new ELException(Util.message(null,
-                    "importHandler.ambiguousStaticImport", name,
-                    conflict.getName() + '.' +  fieldOrMethodName));
+            throw new ELException(Util.message(null, "importHandler.ambiguousStaticImport", name,
+                    conflict.getName() + '.' + fieldOrMethodName));
         }
 
         statics.put(fieldOrMethodName, clazz);
     }
 
 
-    public void importClass(String name) throws jakarta.el.ELException {
+    public void importClass(String name) throws ELException {
         int lastPeriodIndex = name.lastIndexOf('.');
 
         if (lastPeriodIndex < 0) {
-            throw new ELException(Util.message(
-                    null, "importHandler.invalidClassName", name));
+            throw new ELException(Util.message(null, "importHandler.invalidClassName", name));
         }
 
         String unqualifiedName = name.substring(lastPeriodIndex + 1);
@@ -358,8 +357,7 @@ public class ImportHandler {
 
         if (currentName != null && !currentName.equals(name)) {
             // Conflict. Same unqualifiedName, different fully qualified names
-            throw new ELException(Util.message(null,
-                    "importHandler.ambiguousImport", name, currentName));
+            throw new ELException(Util.message(null, "importHandler.ambiguousImport", name, currentName));
         }
     }
 
@@ -379,7 +377,7 @@ public class ImportHandler {
     }
 
 
-    public java.lang.Class<?> resolveClass(String name) {
+    public Class<?> resolveClass(String name) {
         if (name == null || name.contains(".")) {
             return null;
         }
@@ -421,9 +419,8 @@ public class ImportHandler {
             Class<?> clazz = findClass(className, false);
             if (clazz != null) {
                 if (result != null) {
-                    throw new ELException(Util.message(null,
-                            "importHandler.ambiguousImport", className,
-                            result.getName()));
+                    throw new ELException(
+                            Util.message(null, "importHandler.ambiguousImport", className, result.getName()));
                 }
                 result = clazz;
             }
@@ -440,7 +437,7 @@ public class ImportHandler {
     }
 
 
-    public java.lang.Class<?> resolveStatic(String name) {
+    public Class<?> resolveStatic(String name) {
         return statics.get(name);
     }
 
@@ -457,11 +454,10 @@ public class ImportHandler {
         // Class must be public, non-abstract, not an interface and in an
         // exported package
         int modifiers = clazz.getModifiers();
-        if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers) ||
-                Modifier.isInterface(modifiers) || !isExported(clazz)) {
+        if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers) ||
+                !isExported(clazz)) {
             if (throwException) {
-                throw new ELException(Util.message(
-                        null, "importHandler.invalidClass", name));
+                throw new ELException(Util.message(null, "importHandler.invalidClass", name));
             } else {
                 return null;
             }
@@ -479,8 +475,7 @@ public class ImportHandler {
 
 
     /*
-     * Marker class used because null values are not permitted in a
-     * ConcurrentHashMap.
+     * Marker class used because null values are not permitted in a ConcurrentHashMap.
      */
     private static class NotFound {
     }

@@ -38,8 +38,7 @@ import org.apache.tomcat.dbcp.pool2.PooledObject;
 import org.apache.tomcat.dbcp.pool2.impl.DefaultPooledObject;
 
 /**
- * A {@link KeyedPooledObjectFactory} that creates {@link org.apache.tomcat.dbcp.dbcp2.PoolableConnection
- * PoolableConnection}s.
+ * A {@link KeyedPooledObjectFactory} that creates {@link PoolableConnection}s.
  *
  * @since 2.0
  */
@@ -81,7 +80,7 @@ final class KeyedCPDSConnectionFactory implements KeyedPooledObjectFactory<UserP
      *            whether a rollback should be issued after {@link #validateObject validating} {@link Connection}s.
      * @since 2.10.0
      */
-    public KeyedCPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
+    KeyedCPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
             final Duration validationQueryTimeoutSeconds, final boolean rollbackAfterValidation) {
         this.cpds = cpds;
         this.validationQuery = validationQuery;
@@ -105,7 +104,7 @@ final class KeyedCPDSConnectionFactory implements KeyedPooledObjectFactory<UserP
      * @deprecated Use {@link #KeyedCPDSConnectionFactory(ConnectionPoolDataSource, String, Duration, boolean)}.
      */
     @Deprecated
-    public KeyedCPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
+    KeyedCPDSConnectionFactory(final ConnectionPoolDataSource cpds, final String validationQuery,
             final int validationQueryTimeoutSeconds, final boolean rollbackAfterValidation) {
         this(cpds, validationQuery, Duration.ofSeconds(validationQueryTimeoutSeconds), rollbackAfterValidation);
     }
@@ -205,7 +204,7 @@ final class KeyedCPDSConnectionFactory implements KeyedPooledObjectFactory<UserP
     /**
      * Invalidates the PooledConnection in the pool. The KeyedCPDSConnectionFactory closes the connection and pool
      * counters are updated appropriately. Also clears any idle instances associated with the user name that was used to
-     * create the PooledConnection. Connections associated with this user are not affected and they will not be
+     * create the PooledConnection. Connections associated with this user are not affected, and they will not be
      * automatically closed on return to the pool.
      */
     @Override

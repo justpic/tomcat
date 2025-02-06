@@ -33,7 +33,7 @@ import org.apache.jasper.runtime.JspRuntimeLibrary;
 
 public class TestJasperELResolver {
 
-    private static final int STANDARD_RESOLVERS_COUNT = 11;
+    private static final int STANDARD_RESOLVERS_COUNT = 12;
 
     @Test
     public void testConstructorNone() throws Exception {
@@ -70,7 +70,7 @@ public class TestJasperELResolver {
                 Integer.valueOf(((AtomicInteger) getField("resolversSize", resolver)).get()));
     }
 
-    private static final Object getField(String name, Object target)
+    private static Object getField(String name, Object target)
             throws NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
         Field field = target.getClass().getDeclaredField(name);

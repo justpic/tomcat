@@ -68,6 +68,7 @@ public class Import {
 
             if (!cKey.pkg.equals(currentPkg)) {
                 currentPkg = cKey.pkg;
+                currentGroup = "zzz";
                 if (w != null) {
                     w.close();
                 }
@@ -75,6 +76,7 @@ public class Import {
                 FileOutputStream fos = new FileOutputStream(outFile);
                 w = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
                 org.apache.tomcat.buildutil.Utils.insertLicense(w);
+                Utils.insertEditInstructions(w);
             }
 
             if (!currentGroup.equals(cKey.group)) {
@@ -100,7 +102,7 @@ public class Import {
         public final String key;
         public final String group;
 
-        public CompositeKey(String in) {
+        CompositeKey(String in) {
             int posPkg = in.indexOf(Constants.END_PACKAGE_MARKER);
             pkg = in.substring(0, posPkg).replace(Constants.JAVA_EE_SUBSTRING, Constants.JAKARTA_EE_SUBSTRING);
             key = in.substring(posPkg + Constants.END_PACKAGE_MARKER.length());

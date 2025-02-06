@@ -40,13 +40,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
-import jakarta.servlet.http.PushBuilder;
 
 import org.apache.tomcat.util.res.StringManager;
 
 /**
- * Facade class that wraps a Coyote request object.
- * All methods are delegated to the wrapped request.
+ * Facade class that wraps a Coyote request object. All methods are delegated to the wrapped request.
  *
  * @author Craig R. McClanahan
  * @author Remy Maucherat
@@ -85,8 +83,7 @@ public class RequestFacade implements HttpServletRequest {
      * Prevent cloning the facade.
      */
     @Override
-    protected Object clone()
-        throws CloneNotSupportedException {
+    protected Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
@@ -415,7 +412,6 @@ public class RequestFacade implements HttpServletRequest {
 
     @Override
     public HttpSession getSession() {
-        checkFacade();
         return getSession(true);
     }
 
@@ -569,23 +565,10 @@ public class RequestFacade implements HttpServletRequest {
 
 
     @Override
-    public <T extends HttpUpgradeHandler> T upgrade(
-            Class<T> httpUpgradeHandlerClass) throws java.io.IOException, ServletException {
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> httpUpgradeHandlerClass)
+            throws IOException, ServletException {
         checkFacade();
         return request.upgrade(httpUpgradeHandlerClass);
-    }
-
-
-    @Override
-    public PushBuilder newPushBuilder() {
-        checkFacade();
-        return request.newPushBuilder();
-    }
-
-
-    public PushBuilder newPushBuilder(HttpServletRequest request) {
-        checkFacade();
-        return this.request.newPushBuilder(request);
     }
 
 
@@ -597,7 +580,7 @@ public class RequestFacade implements HttpServletRequest {
 
 
     @Override
-    public Map<String, String> getTrailerFields() {
+    public Map<String,String> getTrailerFields() {
         checkFacade();
         return request.getTrailerFields();
     }
